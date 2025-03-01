@@ -36,7 +36,7 @@ exit /b 1
 
 :run
 "%ExePath%" /s
-echo Da cai xong Java 8.
+echo Da cai xong Java 7.
 
 endlocal
 pause

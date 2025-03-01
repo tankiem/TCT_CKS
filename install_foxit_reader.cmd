@@ -18,7 +18,7 @@ echo Dang cai dat Foxit Reader...
 "%ExeFilePath%" /verysilent
 
 if errorlevel 1 (
-    echo Cài đặt Foxit Reader thất bại.
+    echo Cai dat Foxit Reader that bai.
     pause
     exit /b 1
 )

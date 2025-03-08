@@ -29,7 +29,7 @@ curl "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/install_
 goto :menu
 
 :fpt
-curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/FPT_install.cmd --output fpt.cmd && tool_fpt.cmd && del tool_fpt.cmd
+curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/FPT_install.cmd --output fpt.cmd && fpt.cmd && del fpt.cmd
 goto :menu
 
 :exit

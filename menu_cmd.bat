@@ -31,5 +31,6 @@ goto :menu
 :fpt
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/FPT_install.cmd --output fpt.cmd && tool_fpt.cmd && del tool_fpt.cmd
 goto :menu
+
 :exit
 exit

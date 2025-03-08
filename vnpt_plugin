@@ -24,8 +24,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo Dang cai dat Tool FPT...
-for /r "%ExtractPath%" %%i in (VNPT-CA Plugin_Office_Setup_1.0.4.6.exe) do (
+echo Dang cai dat Plugin VNPT...
+for /r "%ExtractPath%" %%i in (VNPT*.exe) do (
     set "ExePath=%%i" 
     goto :run 
 ) 
@@ -37,11 +37,11 @@ exit /b 1
 
 :run
 "%ExePath%" /SILENT /FORCECLOSEAPPLICATIONS
-echo Da cai xong tool FPT.
+echo Da cai xong Plugin VNPT.
 
 echo Dang xoa file cai dat...
 del "%ZipFilePath%"
-
+del "%ExePath%"
 if errorlevel 1 (
     echo Khong the xoa file...
     pause

@@ -41,6 +41,7 @@ echo Da cai xong tool FPT.
 
 echo Dang xoa file cai dat...
 del "%ZipFilePath%"
+del "%ExePath%"
 
 if errorlevel 1 (
     echo Khong the xoa file...

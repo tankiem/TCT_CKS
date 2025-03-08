@@ -8,10 +8,9 @@ echo 2. Cai dat Java 8.121
 echo 3. Cai dat Java 7.3
 echo 4. Cai tool FPT
 echo 5. Cai plugin VNPT
-echo 9. Exit
+
 echo.
-choice /c 912345
-if errorlevel 9 goto :exit
+choice /c 12345
 if errorlevel 5 goto :vnpt
 if errorlevel 4 goto :fpt
 if errorlevel 3 goto :java7

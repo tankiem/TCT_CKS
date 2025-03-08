@@ -36,5 +36,6 @@ goto :menu
 
 :vnpt
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/vnpt_plugin --output vnpt.cmd && vnpt.cmd && del vnpt.cmd
+goto :menu
 :exit
 exit

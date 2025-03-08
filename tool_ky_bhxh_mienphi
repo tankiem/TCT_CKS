@@ -15,7 +15,7 @@ if errorlevel 1 (
 )
 
 echo Dang cai dat tool ky BHXH mien phi...
-"%ExeFilePath%" /s
+"%ExeFilePath%" /q
 
 if errorlevel 1 (
     echo Cai dat tool that bai.

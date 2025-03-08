@@ -1,0 +1,41 @@
+@echo off
+setlocal
+
+set "DesktopPath=%UserProfile%\Desktop"
+set "ExeFilePath=%DesktopPath%\vss-declaration-Setup_2.0.6.70.exe"
+set "DownloadUrl=https://drive.usercontent.google.com/download?id=18VXtYNEF8pWM0ND3UGlI0Xs3oTlkSfmX&export=download&authuser=0&confirm=t&uuid=96fa0fde-f585-4211-a068-a73a3bd0c780&at=AEz70l4ycmwdKR7MHaZ4y1ADqiJ3%3A1741446678188"
+
+echo Dang tai file cai dat...
+curl "%DownloadUrl%" --output "%ExeFilePath%"
+
+if errorlevel 1 (
+    echo Khong the tai tep.
+    pause
+    exit /b 1
+)
+
+echo Dang cai dat tool ky BHXH mien phi...
+"%ExeFilePath%" /verysilent
+
+if errorlevel 1 (
+    echo Cai dat tool that bai.
+    pause
+    exit /b 1
+)
+
+echo  tool ky BHXH mien phi da cai dat thanh cong!
+
+echo Dang xoa file cai dat...
+del "%ExeFilePath%"
+
+if errorlevel 1 (
+    echo Khong the xoa file...
+    pause
+    exit /b 1
+)
+
+echo Da xoa file cai dat.
+
+
+endlocal
+pause

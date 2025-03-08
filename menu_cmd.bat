@@ -7,10 +7,10 @@ echo 1. Cai dat Foxit Reader
 echo 2. Cai dat Java 8.121
 echo 3. Cai dat Java 7.3
 echo 4. Cai tool FPT
-echo 9. Exit
+echo 5. Exit
 echo.
-choice /c 12349
-if errorlevel 9 goto :exit
+choice /c 12345
+if errorlevel 5 goto :exit
 if errorlevel 4 goto :fpt
 if errorlevel 3 goto :java7
 if errorlevel 2 goto :java8
@@ -31,6 +31,5 @@ goto :menu
 :fpt
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/FPT_install.cmd --output fpt.cmd && fpt.cmd && del fpt.cmd
 goto :menu
-
 :exit
 exit

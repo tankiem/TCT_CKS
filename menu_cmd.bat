@@ -9,7 +9,7 @@ echo 3. Cai dat Java 7.3
 echo 4. Cai tool FPT
 echo 9. Exit
 echo.
-choice /c 91234
+choice /c 12349
 if errorlevel 9 goto :exit
 if errorlevel 4 goto :fpt
 if errorlevel 3 goto :java7

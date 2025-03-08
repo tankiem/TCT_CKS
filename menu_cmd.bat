@@ -7,10 +7,10 @@ echo 1. Cai dat Foxit Reader
 echo 2. Cai dat Java 8.121
 echo 3. Cai dat Java 7.3
 echo 4. Cai tool FPT
-echo 0. Exit
+echo 9. Exit
 echo.
-choice /c 01234
-if errorlevel 0 goto :exit
+choice /c 91234
+if errorlevel 9 goto :exit
 if errorlevel 4 goto :fpt
 if errorlevel 3 goto :java7
 if errorlevel 2 goto :java8

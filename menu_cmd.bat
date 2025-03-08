@@ -10,7 +10,7 @@ echo 4. Cai tool FPT
 echo 5. Cai plugin VNPT
 echo 0. Exit
 echo.
-choice /c 012345
+choice /c 123450
 if errorlevel 5 goto :vnpt
 if errorlevel 4 goto :fpt
 if errorlevel 3 goto :java7

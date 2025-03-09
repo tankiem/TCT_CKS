@@ -9,3 +9,7 @@ curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/FPT_insta
 --Cài plugin VNPT
 
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/vnpt_plugin --output vnpt.cmd && vnpt.cmd && del vnpt.cmd
+
+--Cài tool ký thuế Esigner
+
+curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/esigner.cmd --output esig.cmd && esig.cmd && del esig.cmd

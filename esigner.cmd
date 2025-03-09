@@ -4,7 +4,7 @@ setlocal
 set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\eSigner_1.1.0_setup.zip"
 set "ExtractPath=%DesktopPath%\"
-set "DownloadUrl=https://download802.fshare.vn/dl/MgitM1xuJ35w9rSpgEtmahtFmNKmlumrv7-5Zv+oJoBohNC6Q46sxp6fJ6VXuabicueHMG64U-iWAoMF/eSigner_1.1.0_setup.zip"
+set "DownloadUrl=https://drive.usercontent.google.com/download?id=15Y-Up7vdIjOnVjdW0akdYjUDTs_ZPYIW&export=download&authuser=0&confirm=t&uuid=aa0c6cc3-982e-49d8-8af0-4c97f3dcfc2f&at=AEz70l7kwAuZPqxpOM0PWB4ZzxVd:1741482999890"
 
 echo Dang tai tep...
 curl "%DownloadUrl%" --output "%ZipFilePath%"

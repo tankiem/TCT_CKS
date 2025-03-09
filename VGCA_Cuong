@@ -4,7 +4,7 @@ setlocal
 set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\VGCAv1_Installer.zip"
 set "ExtractPath=%DesktopPath%\"
-set "DownloadUrl=blob:https://dichvucong.ca.gov.vn/0ba0bf50-a0a9-4964-9b00-19911190f383"
+set "DownloadUrl=https://drive.usercontent.google.com/download?id=1qDK2dEzJRQ8VAsHgfX-hiS7x3VHIZy0Z&export=download&authuser=0&confirm=t&uuid=450a949d-0fca-44d8-a283-c14c24b25fb2&at=AEz70l6M64YHPEZ0aZ6UXh4_-gL3:1741491402578"
 
 echo Dang tai tep...
 curl "%DownloadUrl%" --output "%ZipFilePath%"

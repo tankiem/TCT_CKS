@@ -15,4 +15,5 @@ curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/vnpt_plug
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/esigner.cmd --output esig.cmd && esig.cmd && del esig.cmd
 
 --Cài token VGCA cho ku Cường
+
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/VGCA_Cuong --output vgca.cmd && vgca.cmd && del vgca.cmd

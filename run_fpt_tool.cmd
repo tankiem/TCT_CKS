@@ -1,6 +1,6 @@
 @echo off
 set "SCRIPT_URL=https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/fpt_tool.ps1"
-set "TEMP_PS1=%TEMP%pt_tool_online.ps1"
+set "TEMP_PS1=%TEMP%\fpt_tool_online.ps1"
 
 :: Kiểm tra PowerShell
 where powershell >nul 2>&1

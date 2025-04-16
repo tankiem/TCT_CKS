@@ -10,7 +10,16 @@ if %errorlevel% neq 0 (
     exit /b
 )
 
-:: Tải file PowerShell từ GitHub
+:: Kiểm tra xem script đã được chạy dưới quyền admin chưa
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Chay lai script voi quyen admin...
+    :: Dùng PowerShell để khởi chạy lại script dưới quyền admin
+    powershell -Command "Start-Process cmd.exe -ArgumentList '/c %~dp0run_fpt_tool_with_admin.cmd' -Verb RunAs"
+    exit
+)
+
+:: Nếu đã có quyền admin, tải script từ GitHub và chạy
 echo Dang tai script tu GitHub...
 powershell -Command "Invoke-WebRequest -Uri '%SCRIPT_URL%' -OutFile '%TEMP_PS1%'"
 

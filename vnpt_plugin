@@ -1,54 +1,66 @@
 @echo off
 setlocal
 
+:: --- Cau hinh cac bien ---
+:: Tao bien cho ten file de de dang quan ly va cap nhat
+set "FileName=VNPT-CA Plugin_Office_Setup_1.0.4.7_v4_SIGNED"
 set "DesktopPath=%UserProfile%\Desktop"
-set "ZipFilePath=%DesktopPath%\VNPT-CA%20Plugin_Office_Setup_1.0.4.7_v4_SIGNED.zip"
-set "ExtractPath=%DesktopPath%\"
-set "DownloadUrl=https://storage-econtract.vnpt.vn/landingpage-prod/2024-09-30/VNPT-CA%20Plugin_Office_Setup_1.0.4.7_v4_SIGNED.zip"
+set "ZipFilePath=%DesktopPath%\%FileName%.zip"
+set "ExtractPath=%DesktopPath%"
+:: Thư mục được giải nén ra thường có tên giống file zip
+set "ExtractedFolderPath=%DesktopPath%\%FileName%"
+set "DownloadUrl=https://storage-econtract.vnpt.vn/landingpage-prod/2024-09-30/%FileName%.zip"
 
-echo Dang tai tep...
-curl "%DownloadUrl%" --output "%ZipFilePath%"
-
+:: --- Tai file ---
+echo [+] Dang tai tep: %FileName%.zip...
+curl -L "%DownloadUrl%" --output "%ZipFilePath%"
 if errorlevel 1 (
-    echo Khong the tai tep.
+    echo [!] Khong the tai tep. Vui long kiem tra lai duong dan URL hoac ket noi mang.
     pause
     exit /b 1
 )
+echo [+] Tai tep thanh cong.
 
-echo Dang giai nen...
+:: --- Giai nen ---
+echo [+] Dang giai nen...
 powershell -Command "Expand-Archive -Path '%ZipFilePath%' -DestinationPath '%ExtractPath%' -Force"
-
 if errorlevel 1 (
-    echo Khong the giai nen.
+    echo [!] Khong the giai nen file.
     pause
     exit /b 1
 )
+echo [+] Giai nen thanh cong.
 
-echo Dang cai dat Plugin VNPT...
-for /r "%ExtractPath%" %%i in (VNPT*.exe) do (
-    set "ExePath=%%i" 
-    goto :run 
-) 
+:: --- Tim va cai dat ---
+echo [+] Dang tim file cai dat trong thu muc: %ExtractedFolderPath%
+for /f "delims=" %%i in ('dir /b /s "%ExtractedFolderPath%\VNPT*.exe"') do (
+    set "ExePath=%%i"
+    goto :run_installer
+)
 
-
-echo Khong tim thay chuong trinh cai dat.
+echo [!] Khong tim thay chuong trinh cai dat (VNPT*.exe).
 pause
-exit /b 1
+goto :cleanup
 
-:run
+:run_installer
+echo [+] Dang cai dat: %ExePath%
 "%ExePath%" /SILENT /FORCECLOSEAPPLICATIONS
-echo Da cai xong Plugin VNPT.
+echo [+] Da cai dat xong Plugin VNPT.
 
-echo Dang xoa file cai dat...
-del "%ZipFilePath%"
-del "%ExePath%"
-if errorlevel 1 (
-    echo Khong the xoa file...
-    pause
-    exit /b 1
+:: --- Don dep ---
+:cleanup
+echo [+] Dang don dep file tam...
+if exist "%ZipFilePath%" (
+    del "%ZipFilePath%"
+    echo [i] Da xoa file ZIP.
 )
 
-echo Da xoa file cai dat.
+if exist "%ExtractedFolderPath%" (
+    rmdir /s /q "%ExtractedFolderPath%"
+    echo [i] Da xoa thu muc giai nen.
+)
+
+echo [+] Hoan thanh!
 
 endlocal
 pause

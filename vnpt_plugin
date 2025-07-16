@@ -9,7 +9,7 @@ set "ZipFilePath=%DesktopPath%\%FileName%.zip"
 set "ExtractPath=%DesktopPath%"
 :: Thư mục được giải nén ra thường có tên giống file zip
 set "ExtractedFolderPath=%DesktopPath%\%FileName%"
-set "DownloadUrl=https://storage-econtract.vnpt.vn/landingpage-prod/2024-09-30/%FileName%.zip"
+set "DownloadUrl=https://drive.usercontent.google.com/download?id=1vfxUtQoTdu0Edv8tEy9JB5-nmrUd5Ogs&export=download&authuser=0&confirm=t&uuid=5ff75907-96c0-4c6b-b7a6-032683fb4e0d&at=AN8xHoqQBLgiPp7YrlEVWYR6dNA5%3A1752643079744"
 
 :: --- Tai file ---
 echo [+] Dang tai tep: %FileName%.zip...

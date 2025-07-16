@@ -4,7 +4,7 @@ setlocal
 set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\VNPT-CA Plugin_Office_Setup_1.0.4.6.zip"
 set "ExtractPath=%DesktopPath%\"
-set "DownloadUrl=https://drive.usercontent.google.com/download?id=1RuboDNFYbLeOp_7v0KQU-8DP7Nuq_pGU&export=download&authuser=0&confirm=t&uuid=ba67145b-e1fc-4176-a790-2b0a3ae7171c&at=AEz70l4m0V24eop6BAdFG4FNEepR:1741443148263"
+set "DownloadUrl=https://storage-econtract.vnpt.vn/landingpage-prod/2024-09-30/VNPT-CA%20Plugin_Office_Setup_1.0.4.7_v4_SIGNED.zip"
 
 echo Dang tai tep...
 curl "%DownloadUrl%" --output "%ZipFilePath%"

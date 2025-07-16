@@ -2,7 +2,7 @@
 setlocal
 
 set "DesktopPath=%UserProfile%\Desktop"
-set "ZipFilePath=%DesktopPath%\VNPT-CA Plugin_Office_Setup_1.0.4.6.zip"
+set "ZipFilePath=%DesktopPath%\VNPT-CA%20Plugin_Office_Setup_1.0.4.7_v4_SIGNED.zip"
 set "ExtractPath=%DesktopPath%\"
 set "DownloadUrl=https://storage-econtract.vnpt.vn/landingpage-prod/2024-09-30/VNPT-CA%20Plugin_Office_Setup_1.0.4.7_v4_SIGNED.zip"
 

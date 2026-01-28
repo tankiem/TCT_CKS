@@ -13,10 +13,10 @@ set "LOG=%LOGDIR%\deploy.log"
 
 REM Temp working folder (avoid Desktop in mass deployment)
 set "WORKDIR=%ProgramData%\CTSigningHubDeploy\pkg"
-set "ZIP=%WORKDIR%\CTSigningHub.zip"
+set "RAR=%WORKDIR%\CTSigningHub.rar"
 set "EXE=%WORKDIR%\CTSigningHub.exe"
 
-REM Optional: if installer drops a shortcut, we can attempt to resolve target later (per-user desktop may not exist under SYSTEM)
+REM Optional: if installer drops a shortcut, we can attempt to resolve target later
 set "LNK_PUBLIC=%Public%\Desktop\CTSigningHub.lnk"
 
 REM ================== INIT ==================
@@ -36,31 +36,41 @@ if "%INSTALLED%"=="1" (
 )
 
 REM ================== 1) DOWNLOAD ==================
-call :log "[1/5] Download package..."
+call :log "[1/5] Download package (RAR)..."
 where curl >nul 2>&1
 if %errorlevel% neq 0 (
   call :log "ERROR: curl not found. Exit 10."
   exit /b 10
 )
 
-del /f /q "%ZIP%" >nul 2>&1
-curl -L --fail --retry 3 --retry-delay 2 -o "%ZIP%" "%URL%"
-if not exist "%ZIP%" (
+del /f /q "%RAR%" >nul 2>&1
+curl -L --fail --retry 3 --retry-delay 2 -o "%RAR%" "%URL%"
+if not exist "%RAR%" (
   call :log "ERROR: Download failed. Exit 11."
   exit /b 11
 )
 
-REM ================== 2) EXTRACT ==================
-call :log "[2/5] Extract ZIP..."
+REM ================== 2) EXTRACT (RAR) ==================
+call :log "[2/5] Extract RAR..."
 del /f /q "%EXE%" >nul 2>&1
 
-where tar >nul 2>&1
-if %errorlevel%==0 (
-  tar -xf "%ZIP%" -C "%WORKDIR%"
-) else (
-  REM Fallback unzip only
-  powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "Expand-Archive -Force '%ZIP%' '%WORKDIR%'" >> "%LOG%" 2>&1
+REM Clean old extracted contents (optional, but helpful)
+REM WARNING: This deletes the workdir contents; comment out if you need to keep other files.
+for %%F in ("%WORKDIR%\*") do (
+  if /I not "%%~fF"=="%RAR%" del /f /q "%%~fF" >nul 2>&1
+)
+
+call :find_extractor
+if not defined EXTRACTOR (
+  call :log "ERROR: No RAR extractor found (7z.exe or unrar.exe). Install 7-Zip or WinRAR. Exit 13."
+  exit /b 13
+)
+
+call :log "Using extractor: %EXTRACTOR%"
+call :extract_rar "%RAR%" "%WORKDIR%"
+if %errorlevel% neq 0 (
+  call :log "ERROR: Extract failed. Exit 14."
+  exit /b 14
 )
 
 if not exist "%EXE%" (
@@ -97,8 +107,6 @@ REM ================== 5) HEALTH CHECK + (OPTIONAL) LAUNCH ==================
 call :log "[5/5] Health check..."
 call :health_check
 
-REM Optional launch: in mass deployment under SYSTEM, launching UI is usually pointless.
-REM If you still want to trigger plugin initialization, do it only if a shortcut exists on Public Desktop.
 if exist "%LNK_PUBLIC%" (
   call :log "Public desktop shortcut found. Attempt init launch (no UI guarantee)."
   call :launch_from_lnk "%LNK_PUBLIC%"
@@ -122,7 +130,7 @@ echo %DATE% %TIME% - %~1>> "%LOG%"
 exit /b 0
 
 :cleanup
-del /f /q "%ZIP%" >nul 2>&1
+del /f /q "%RAR%" >nul 2>&1
 del /f /q "%EXE%" >nul 2>&1
 exit /b 0
 
@@ -150,7 +158,6 @@ exit /b 0
 :health_check
 REM Exit code policy:
 REM 0  = installed + passed basic checks
-REM 3010 not used as exit here; logged only (SCCM/Intune can handle separately if needed)
 REM 30 = installed but basic signals missing (needs investigation)
 set "EXITCODE=0"
 set "OKSIG=0"
@@ -167,7 +174,6 @@ tasklist | findstr /i "ctfmon.exe" >nul && set /a OKSIG+=1
 
 call :log "Health signals count: !OKSIG! (reg/service/ctfmon)"
 
-REM If app installed but no signals at all -> degraded
 if "!OKSIG!"=="0" set "EXITCODE=30"
 exit /b 0
 
@@ -198,3 +204,52 @@ if defined TARGET_EXE (
 )
 exit /b 0
 
+:find_extractor
+REM Prefer 7-Zip if available; fallback to WinRAR unrar.exe
+
+set "EXTRACTOR="
+
+REM 1) If 7z is in PATH
+where 7z >nul 2>&1 && set "EXTRACTOR=7z"
+
+REM 2) Common 7-Zip install paths
+if not defined EXTRACTOR (
+  if exist "%ProgramFiles%\7-Zip\7z.exe" set "EXTRACTOR=%ProgramFiles%\7-Zip\7z.exe"
+)
+if not defined EXTRACTOR (
+  if exist "%ProgramFiles(x86)%\7-Zip\7z.exe" set "EXTRACTOR=%ProgramFiles(x86)%\7-Zip\7z.exe"
+)
+
+REM 3) WinRAR unrar.exe
+if not defined EXTRACTOR (
+  if exist "%ProgramFiles%\WinRAR\UnRAR.exe" set "EXTRACTOR=%ProgramFiles%\WinRAR\UnRAR.exe"
+)
+if not defined EXTRACTOR (
+  if exist "%ProgramFiles(x86)%\WinRAR\UnRAR.exe" set "EXTRACTOR=%ProgramFiles(x86)%\WinRAR\UnRAR.exe"
+)
+
+exit /b 0
+
+:extract_rar
+REM Args: %1=rar file, %2=dest folder
+set "RARFILE=%~1"
+set "DEST=%~2"
+
+if not exist "%DEST%" mkdir "%DEST%" >nul 2>&1
+
+REM If extractor is "7z" or ends with 7z.exe -> use 7z syntax
+echo "%EXTRACTOR%" | findstr /i "7z" >nul
+if %errorlevel%==0 (
+  "%EXTRACTOR%" x -y "-o%DEST%" "%RARFILE%" >> "%LOG%" 2>&1
+  exit /b %errorlevel%
+)
+
+REM If extractor is UnRAR.exe -> use unrar syntax
+echo "%EXTRACTOR%" | findstr /i "unrar" >nul
+if %errorlevel%==0 (
+  "%EXTRACTOR%" x -y "%RARFILE%" "%DEST%\" >> "%LOG%" 2>&1
+  exit /b %errorlevel%
+)
+
+REM Unknown extractor
+exit /b 1

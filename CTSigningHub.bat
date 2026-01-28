@@ -2,7 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 REM ================== CONFIG ==================
-set "URL=https://drive.usercontent.google.com/download?id=1u_J3WdooG_M0CdKcLWwrrQljw5mYQRF-&export=download&authuser=0&confirm=t&uuid=795406f1-ef4a-4352-915c-e2ba56cedb98&at=ANTm3cw8Q9TtyCitUkD0dnc5lLPh%3A1766112694154"
+set "URL=https://download803.fshare.vn/dl/YE2-GeXdZYqU4DPzzZ4OMsMLgWO4R-fMqv+6thUzy121qo5E+KSkZEQ6fpRsVKR07TaEKuiLu3HJ9xmT/CTSigningHub_signed%20%281%29.rar"
 
 REM App identity (used for detection). Adjust if your ARP DisplayName differs.
 set "APP_MATCH=CTSigningHub"
@@ -197,3 +197,4 @@ if defined TARGET_EXE (
   call :log "Launch skipped: cannot resolve TargetPath from %LNKFILE%"
 )
 exit /b 0
+

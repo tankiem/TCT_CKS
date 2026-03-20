@@ -2,7 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 
 REM ================== CONFIG ==================
-set "URL=https://download803.fshare.vn/dl/YE2-GeXdZYqU4DPzzZ4OMsMLgWO4R-fMqv+6thUzy121qo5E+KSkZEQ6fpRsVKR07TaEKuiLu3HJ9xmT/CTSigningHub_signed%20%281%29.rar"
+set "URL=https://drive.usercontent.google.com/download?id=1RMXLInvSDHlOUcS6Z430IMBS_i1zg0l7&export=download&authuser=0&confirm=t&uuid=4b012612-5cbe-4842-b449-cfb0461c8def&at=AGN2oQ2cLRAr7tCtgjWcP22WCYZJ:1773989795562"
 
 REM App identity (used for detection). Adjust if your ARP DisplayName differs.
 set "APP_MATCH=CTSigningHub"

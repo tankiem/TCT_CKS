@@ -10,9 +10,11 @@ echo 4. Cai tool FPT
 echo 5. Cai plugin VNPT
 echo 6. Cai tool ky so BHXH free
 echo 7. Cai Esigner tool ky thue dien tu
+echo 8. Cai Plugin CTSigningHub dich vu cong
 
 echo.
-choice /c 1234567
+choice /c 12345678
+if errorlevel 8 goto :cthub
 if errorlevel 7 goto :esigner
 if errorlevel 6 goto :bhxh_free
 if errorlevel 5 goto :vnpt
@@ -48,6 +50,10 @@ goto :menu
 
 :esigner
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/esigner.cmd --output esig.cmd && esig.cmd && del esig.cmd
+goto :menu
+
+:cthub
+curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/CTSigningHub.bat --output cthub.cmd && cthub.cmd && del cthub.cmd
 goto :menu
 
 :exit

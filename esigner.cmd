@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 :: ===== CONFIG =====
 set "WORKDIR=%TEMP%\esigner_setup"
 set "ZIPFILE=%WORKDIR%\esigner.zip"
-set "DownloadUrl=https://drive.usercontent.google.com/download?id=15Y-Up7vdIjOnVjdW0akdYjUDTs_ZPYIW&export=download"
+set "DownloadUrl=https://drive.usercontent.google.com/download?id=15Y-Up7vdIjOnVjdW0akdYjUDTs_ZPYIW&export=download&authuser=0&confirm=t&uuid=aa0c6cc3-982e-49d8-8af0-4c97f3dcfc2f&at=AEz70l7kwAuZPqxpOM0PWB4ZzxVd:1741482999890"
 
 :: ===== TAO THU MUC TAM =====
 if not exist "%WORKDIR%" mkdir "%WORKDIR%"

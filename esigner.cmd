@@ -1,15 +1,12 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: ===== CONFIG =====
 set "WORKDIR=%TEMP%\esigner_setup"
 set "ZIPFILE=%WORKDIR%\esigner.zip"
-set "DownloadUrl=https://drive.usercontent.google.com/download?id=15Y-Up7vdIjOnVjdW0akdYjUDTs_ZPYIW&export=download&authuser=0&confirm=t&uuid=aa0c6cc3-982e-49d8-8af0-4c97f3dcfc2f&at=AGN2oQ0oawIyfiOBWyG2gucnt1ip%3A1774377417480"
+set "DownloadUrl=https://drive.google.com/uc?export=download&id=15Y-Up7vdIjOnVjdW0akdYjUDTs_ZPYIW"
 
-:: ===== TAO THU MUC TAM =====
 if not exist "%WORKDIR%" mkdir "%WORKDIR%"
 
-:: ===== DOWNLOAD =====
 echo Dang tai tep...
 curl -L -# "%DownloadUrl%" -o "%ZIPFILE%"
 
@@ -19,19 +16,20 @@ if not exist "%ZIPFILE%" (
     exit /b 1
 )
 
-echo Tai thanh cong!
+:: Check dung luong file
+for %%A in ("%ZIPFILE%") do set size=%%~zA
 
-:: ===== GIAI NEN =====
-echo Dang giai nen...
-powershell -Command "Expand-Archive -Path '%ZIPFILE%' -DestinationPath '%WORKDIR%' -Force"
-
-if errorlevel 1 (
-    echo Khong the giai nen.
+if !size! LSS 100000 (
+    echo File tai ve khong hop le (co the la HTML tu Google Drive)
     pause
     exit /b 1
 )
 
-:: ===== TIM FILE EXE =====
+echo Tai thanh cong
+
+echo Dang giai nen...
+powershell -Command "Expand-Archive -Path '%ZIPFILE%' -DestinationPath '%WORKDIR%' -Force"
+
 echo Dang tim file cai dat...
 set "ExePath="
 
@@ -45,25 +43,12 @@ pause
 exit /b 1
 
 :run
-echo Tim thay: %ExePath%
-echo Dang cai dat tool ky thue...
-
+echo Dang cai dat eSigner...
 start /wait "" "%ExePath%" /SILENT /FORCECLOSEAPPLICATIONS
 
-if errorlevel 1 (
-    echo Cai dat that bai.
-    pause
-    exit /b 1
-)
+echo Cai dat xong!
 
-echo Da cai xong tool ky thue eSigner!
-
-:: ===== CLEAN =====
-echo Dang xoa file cai dat...
 del /f /q "%ZIPFILE%" >nul 2>&1
-del /f /q "%ExePath%" >nul 2>&1
-
-:: Xoa ca thu muc tam
 rd /s /q "%WORKDIR%" >nul 2>&1
 
 echo Da don dep file tam.

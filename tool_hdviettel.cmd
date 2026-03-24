@@ -3,7 +3,7 @@ setlocal
 
 set "DesktopPath=%UserProfile%\Desktop"
 set "ExeFilePath=%DesktopPath%\viettel-tool-ki-so-1.0.1.exe"
-set "DownloadUrl=https://sinvoice.viettel.vn/download/soft/viettel-tool-ki-so-1.0.1.exe"
+set "DownloadUrl=https://cksvietnam.vn/download/viettel-tool-ki-so-1.0.1.exe"
 
 echo Dang tai file cai dat...
 curl "%DownloadUrl%" --output "%ExeFilePath%"
@@ -18,7 +18,7 @@ echo Dang cai dat Tool ky hoa don Viettel...
 "%ExeFilePath%" /q
 
 if errorlevel 1 (
-    echo Cài đặt Foxit Reader thất bại.
+    echo Cài đặt thất bại.
     pause
     exit /b 1
 )

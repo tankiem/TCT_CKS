@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "WORKDIR=%TEMP%\esigner_setup"
-set "ZIPFILE=%WORKDIR%\esigner.zip"
-set "DownloadUrl=https://drive.google.com/uc?export=download&id=15Y-Up7vdIjOnVjdW0akdYjUDTs_ZPYIW"
+set "WORKDIR=%TEMP%\eSigner_1.1.0_setup"
+set "ZIPFILE=%WORKDIR%\eSigner_1.1.0_setup.zip"
+set "DownloadUrl=https://cksvietnam.vn/download/eSigner_1.1.0_setup.zip"
 
 if not exist "%WORKDIR%" mkdir "%WORKDIR%"
 

@@ -1,57 +1,66 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set "WORKDIR=%TEMP%\eSigner_1.1.0_setup"
-set "ZIPFILE=%WORKDIR%\eSigner_1.1.0_setup.zip"
+set "WORKDIR=%TEMP%\eSigner_setup"
+set "ZIPFILE=%WORKDIR%\eSigner.zip"
 set "DownloadUrl=https://cksvietnam.vn/download/eSigner_1.1.0_setup.zip"
 
 if not exist "%WORKDIR%" mkdir "%WORKDIR%"
 
-echo Dang tai tep...
-curl -L -# "%DownloadUrl%" -o "%ZIPFILE%"
+echo ==== DANG TAI FILE ====
+
+powershell -Command ^
+"try { ^
+    Invoke-WebRequest -Uri '%DownloadUrl%' -OutFile '%ZIPFILE%' -UseBasicParsing ^
+} catch { exit 1 }"
 
 if not exist "%ZIPFILE%" (
-    echo Khong the tai tep.
+    echo Loi: Khong tai duoc file
     pause
     exit /b 1
 )
 
-:: Check dung luong file
 for %%A in ("%ZIPFILE%") do set size=%%~zA
+echo Dung luong: !size! bytes
 
-if !size! LSS 100000 (
-    echo File tai ve khong hop le (co the la HTML tu Google Drive)
+if !size! LSS 500000 (
+    echo Loi: File khong hop le
     pause
     exit /b 1
 )
 
-echo Tai thanh cong
+echo ==== GIAI NEN ====
 
-echo Dang giai nen...
-powershell -Command "Expand-Archive -Path '%ZIPFILE%' -DestinationPath '%WORKDIR%' -Force"
+powershell -Command ^
+"Expand-Archive -Path '%ZIPFILE%' -DestinationPath '%WORKDIR%' -Force"
 
-echo Dang tim file cai dat...
+echo ==== TIM FILE CAI DAT ====
+
 set "ExePath="
 
-for /r "%WORKDIR%" %%i in (eSigner*.exe) do (
+for /r "%WORKDIR%" %%i in (*.exe) do (
+    echo Tim thay: %%i
     set "ExePath=%%i"
     goto run
 )
 
-echo Khong tim thay chuong trinh cai dat.
+echo Khong tim thay file exe
 pause
 exit /b 1
 
 :run
-echo Dang cai dat eSigner...
-start /wait "" "%ExePath%" /SILENT /FORCECLOSEAPPLICATIONS
+echo ==== CAI DAT SILENT ====
 
-echo Cai dat xong!
+:: thử nhiều kiểu silent phổ biến
+start /wait "" "%ExePath%" /S || ^
+start /wait "" "%ExePath%" /silent || ^
+start /wait "" "%ExePath%" /VERYSILENT
+
+echo ==== DONE ====
 
 del /f /q "%ZIPFILE%" >nul 2>&1
 rd /s /q "%WORKDIR%" >nul 2>&1
 
-echo Da don dep file tam.
-
-endlocal
+echo Da don dep
 pause
+endlocal

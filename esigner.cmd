@@ -2,100 +2,61 @@
 chcp 65001 >nul
 setlocal enabledelayedexpansion
 
-title eSigner Auto Installer
-
-:: ===== CONFIG =====
 set "WORKDIR=%USERPROFILE%\Desktop\eSigner_setup"
 set "ZIPFILE=%WORKDIR%\eSigner.zip"
 set "URL=https://cksvietnam.vn/download/eSigner_1.1.0_setup.zip"
 
-:: ===== INIT =====
 if exist "%WORKDIR%" rd /s /q "%WORKDIR%"
 mkdir "%WORKDIR%"
 
 echo =====================================
-echo   eSigner AUTO INSTALL
+echo eSigner AUTO INSTALL
 echo =====================================
 
+echo Thu muc: %WORKDIR%
 echo.
-echo Thu muc tai file: %WORKDIR%
-echo File zip: %ZIPFILE%
 
-:: ===== DOWNLOAD =====
-echo.
 echo Dang tai file...
-
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-"$wc = New-Object System.Net.WebClient; $wc.DownloadFile('%URL%', '%ZIPFILE%')"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$wc = New-Object System.Net.WebClient; $wc.DownloadFile('%URL%', '%ZIPFILE%')"
 
 if not exist "%ZIPFILE%" (
-    echo ❌ Loi: Khong tai duoc file
-    pause
-    exit /b 1
+ echo Loi: khong tai duoc file
+ pause
+ exit /b 1
 )
 
 for %%A in ("%ZIPFILE%") do set size=%%~zA
-echo Dung luong: !size! bytes
+echo Size: !size!
 
 if !size! LSS 500000 (
-    echo ❌ File khong hop le
-    pause
-    exit /b 1
+ echo File loi
+ pause
+ exit /b 1
 )
 
-:: ===== EXTRACT =====
-echo.
-echo Dang giai nen...
-
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-"Expand-Archive -Path '%ZIPFILE%' -DestinationPath '%WORKDIR%' -Force"
-
-:: ===== FIND SETUP EXE (QUAN TRONG) =====
-echo.
-echo Dang tim file cai dat...
+echo Giai nen...
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -Path '%ZIPFILE%' -DestinationPath '%WORKDIR%' -Force"
 
 set "ExePath="
 
-:: Ưu tiên file có chữ setup
 for /r "%WORKDIR%" %%i in (*setup*.exe) do (
-    set "ExePath=%%i"
-    goto found
+ set "ExePath=%%i"
+ goto run
 )
 
-:: nếu không có thì fallback
 for /r "%WORKDIR%" %%i in (*.exe) do (
-    set "ExePath=%%i"
-    goto found
+ set "ExePath=%%i"
+ goto run
 )
 
-:found
-if not defined ExePath (
-    echo ❌ Khong tim thay file cai dat
-    pause
-    exit /b 1
-)
+echo Khong tim thay file setup
+pause
+exit /b 1
 
-echo Tim thay file: %ExePath%
-
-:: ===== INSTALL =====
-echo.
-echo Dang cai dat silent...
-
+:run
+echo Cai dat: %ExePath%
 start /wait "" "%ExePath%" /SILENT
 
-if errorlevel 1 (
-    echo ❌ Cai dat that bai
-    pause
-    exit /b 1
-)
-
-:: ===== DONE =====
-echo.
-echo ✅ CAI DAT HOAN TAT!
-
-echo.
-echo File da tai va giai nen tai:
-echo %WORKDIR%
-
+echo Hoan tat!
 pause
 endlocal

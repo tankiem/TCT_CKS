@@ -99,7 +99,7 @@ exit /b 1
 echo.
 echo Dang cai dat silent...
 
-start /wait "" "%ExePath%" /SILENT /FORCECLOSEAPPLICATIONS
+start /wait "" "%ExePath%" /SILENT
 
 if errorlevel 1 (
     echo ❌ Cai dat that bai

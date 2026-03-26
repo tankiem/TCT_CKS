@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 title eSigner Auto Installer
@@ -6,10 +7,7 @@ title eSigner Auto Installer
 :: ===== CONFIG =====
 set "WORKDIR=%TEMP%\eSigner_auto"
 set "ZIPFILE=%WORKDIR%\eSigner.zip"
-
-:: Danh sách link fallback (ưu tiên từ trên xuống)
-set URL1=https://cksvietnam.vn/download/eSigner_1.1.0_setup.zip
-set URL2=https://cksvietnam.vn/download/eSigner_setup.zip
+set "DownloadUrl=https://cksvietnam.vn/download/eSigner_1.1.0_setup.zip"
 
 :: ===== INIT =====
 if exist "%WORKDIR%" rd /s /q "%WORKDIR%"
@@ -19,54 +17,24 @@ echo =====================================
 echo   eSigner AUTO INSTALL
 echo =====================================
 
-:: ===== DOWNLOAD FUNCTION =====
-set "DOWNLOAD_OK=0"
+:: ===== DOWNLOAD =====
+echo.
+echo Dang tai file...
 
-for %%U in ("%URL1%" "%URL2%") do (
-    if "!DOWNLOAD_OK!"=="0" (
-        echo.
-        echo Dang thu tai: %%~U
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+"Invoke-WebRequest -Uri '%DownloadUrl%' -OutFile '%ZIPFILE%'"
 
-        powershell -Command ^
-        "try { ^
-            Invoke-WebRequest -Uri '%%~U' -OutFile '%ZIPFILE%' -UseBasicParsing -TimeoutSec 30 ^
-        } catch { exit 1 }"
-
-        if exist "%ZIPFILE%" (
-            for %%A in ("%ZIPFILE%") do set size=%%~zA
-
-            echo Dung luong: !size! bytes
-
-            if !size! GTR 500000 (
-                echo Tai thanh cong!
-                set DOWNLOAD_OK=1
-            ) else (
-                echo File khong hop le, thu link khac...
-                del /f /q "%ZIPFILE%" >nul 2>&1
-            )
-        )
-    )
-)
-
-if "%DOWNLOAD_OK%"=="0" (
-    echo.
-    echo ❌ Tat ca link deu loi. Khong tai duoc eSigner.
+if not exist "%ZIPFILE%" (
+    echo ❌ Loi: Khong tai duoc file
     pause
     exit /b 1
 )
 
-:: ===== CHECK FILE ZIP =====
-echo.
-echo Kiem tra file zip...
+for %%A in ("%ZIPFILE%") do set size=%%~zA
+echo Dung luong: !size! bytes
 
-powershell -Command ^
-"try { ^
-    Add-Type -AssemblyName System.IO.Compression.FileSystem; ^
-    [IO.Compression.ZipFile]::OpenRead('%ZIPFILE%').Dispose() ^
-} catch { exit 1 }"
-
-if errorlevel 1 (
-    echo ❌ File zip bi loi (co the la HTML)
+if !size! LSS 500000 (
+    echo ❌ File khong hop le
     pause
     exit /b 1
 )
@@ -75,7 +43,7 @@ if errorlevel 1 (
 echo.
 echo Dang giai nen...
 
-powershell -Command ^
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 "Expand-Archive -Path '%ZIPFILE%' -DestinationPath '%WORKDIR%' -Force"
 
 :: ===== FIND EXE =====

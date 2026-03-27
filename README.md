@@ -1,4 +1,4 @@
-----Menu cài đặt nhanh 1 số token, plugin
+----Menu cài đặt nhanh 1 số token, plugin ( chạy powershell với quyền admin)
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; irm "https://bit.ly/ttca-tool" | iex
 

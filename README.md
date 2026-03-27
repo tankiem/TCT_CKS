@@ -1,3 +1,6 @@
+----Menu cài đặt nhanh 1 số token, plugin
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; irm "https://bit.ly/ttca-tool" | iex
+
 --Menu cài đặt nhanh 1 số plugin
 
 curl https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/menu_cmd.bat --output temp.cmd && temp.cmd && del temp.cmd

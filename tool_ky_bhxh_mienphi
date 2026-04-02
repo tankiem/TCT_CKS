@@ -3,7 +3,7 @@ setlocal
 
 :: ====== CONFIG ======
 set "FILE=%TEMP%\vss_setup.exe"
-set "DownloadUrl=https://drive.usercontent.google.com/download?id=18VXtYNEF8pWM0ND3UGlI0Xs3oTlkSfmX&export=download&authuser=0&confirm=t&uuid=96fa0fde-f585-4211-a068-a73a3bd0c780&at=AGN2oQ0s1kBNW1Y8X_Za3_H-qQnY%3A1774376594104"
+set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/download/VNPT_Tool/vss-declaration-Setup_2.0.6.70.exe"
 
 :: ====== DOWNLOAD ======
 echo Dang tai file cai dat...

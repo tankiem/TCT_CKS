@@ -1,66 +1,138 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
-:: --- Cau hinh cac bien ---
-:: Tao bien cho ten file de de dang quan ly va cap nhat
-set "FileName=VNPT-CA Plugin_Office_Setup_1.0.4.7_v4_SIGNED"
+:: ==============================
+:: CONFIG
+:: ==============================
+set "FileName=VNPT-CA.Plugin_Office_Setup_1.0.4.7_v4_SIGNED"
 set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\%FileName%.zip"
 set "ExtractPath=%DesktopPath%"
-:: Thư mục được giải nén ra thường có tên giống file zip
 set "ExtractedFolderPath=%DesktopPath%\%FileName%"
-set "DownloadUrl=https://drive.usercontent.google.com/download?id=1vfxUtQoTdu0Edv8tEy9JB5-nmrUd5Ogs&export=download&authuser=0&confirm=t&uuid=5ff75907-96c0-4c6b-b7a6-032683fb4e0d&at=AN8xHoqQBLgiPp7YrlEVWYR6dNA5%3A1752643079744"
 
-:: --- Tai file ---
-echo [+] Dang tai tep: %FileName%.zip...
-curl -L "%DownloadUrl%" --output "%ZipFilePath%"
-if errorlevel 1 (
-    echo [!] Khong the tai tep. Vui long kiem tra lai duong dan URL hoac ket noi mang.
-    pause
-    exit /b 1
-)
-echo [+] Tai tep thanh cong.
+:: Link latest (khuyên dùng)
+set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/latest/download/%FileName%.zip"
 
-:: --- Giai nen ---
-echo [+] Dang giai nen...
-powershell -Command "Expand-Archive -Path '%ZipFilePath%' -DestinationPath '%ExtractPath%' -Force"
-if errorlevel 1 (
-    echo [!] Khong the giai nen file.
-    pause
-    exit /b 1
-)
-echo [+] Giai nen thanh cong.
+:: ==============================
+:: DOWNLOAD (FAST + RETRY)
+:: ==============================
+echo.
+echo =====================================
+echo [1/4] DOWNLOADING...
+echo =====================================
 
-:: --- Tim va cai dat ---
-echo [+] Dang tim file cai dat trong thu muc: %ExtractedFolderPath%
-for /f "delims=" %%i in ('dir /b /s "%ExtractedFolderPath%\VNPT*.exe"') do (
-    set "ExePath=%%i"
-    goto :run_installer
-)
+set RETRY=3
+set COUNT=0
 
-echo [!] Khong tim thay chuong trinh cai dat (VNPT*.exe).
-pause
-goto :cleanup
+:download_retry
+set /a COUNT+=1
+echo [+] Attempt !COUNT!...
 
-:run_installer
-echo [+] Dang cai dat: %ExePath%
-"%ExePath%" /SILENT /FORCECLOSEAPPLICATIONS
-echo [+] Da cai dat xong Plugin VNPT.
+curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 15 ^
+--speed-time 15 --speed-limit 1000 ^
+-o "%ZipFilePath%" "%DownloadUrl%"
 
-:: --- Don dep ---
-:cleanup
-echo [+] Dang don dep file tam...
 if exist "%ZipFilePath%" (
-    del "%ZipFilePath%"
-    echo [i] Da xoa file ZIP.
+    echo [+] Download success!
+) else (
+    if !COUNT! lss %RETRY% (
+        echo [!] Retry download...
+        timeout /t 2 >nul
+        goto download_retry
+    ) else (
+        echo [X] Download FAILED after %RETRY% attempts!
+        pause
+        exit /b 1
+    )
+)
+
+:: ==============================
+:: EXTRACT
+:: ==============================
+echo.
+echo =====================================
+echo [2/4] EXTRACTING...
+echo =====================================
+
+if not exist "%ZipFilePath%" (
+    echo [X] File not found!
+    exit /b 1
+)
+
+powershell -NoProfile -Command ^
+"try { Expand-Archive -Path '%ZipFilePath%' -DestinationPath '%ExtractPath%' -Force } catch { exit 1 }"
+
+if errorlevel 1 (
+    echo [X] Extract FAILED!
+    pause
+    exit /b 1
+)
+
+echo [+] Extract success!
+
+:: ==============================
+:: FIND INSTALLER
+:: ==============================
+echo.
+echo =====================================
+echo [3/4] FINDING INSTALLER...
+echo =====================================
+
+set "ExePath="
+
+for /f "delims=" %%i in ('dir /b /s "%ExtractedFolderPath%\VNPT*.exe" 2^>nul') do (
+    set "ExePath=%%i"
+    goto found_exe
+)
+
+:found_exe
+if not defined ExePath (
+    echo [X] Installer not found!
+    pause
+    goto cleanup
+)
+
+echo [+] Found: !ExePath!
+
+:: ==============================
+:: INSTALL
+:: ==============================
+echo.
+echo =====================================
+echo [4/4] INSTALLING...
+echo =====================================
+
+start "" /wait "!ExePath!" /silent /FORCECLOSEAPPLICATIONS
+
+if errorlevel 1 (
+    echo [!] Installer returned error (may still installed).
+) else (
+    echo [+] Install completed!
+)
+
+:: ==============================
+:: CLEANUP
+:: ==============================
+:cleanup
+echo.
+echo =====================================
+echo CLEANING...
+echo =====================================
+
+if exist "%ZipFilePath%" (
+    del /f /q "%ZipFilePath%"
+    echo [+] Deleted ZIP
 )
 
 if exist "%ExtractedFolderPath%" (
     rmdir /s /q "%ExtractedFolderPath%"
-    echo [i] Da xoa thu muc giai nen.
+    echo [+] Deleted extracted folder
 )
 
-echo [+] Hoan thanh!
+echo.
+echo =====================================
+echo DONE!
+echo =====================================
 
-endlocal
 pause
+endlocal

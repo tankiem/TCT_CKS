@@ -1,55 +1,136 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
+:: ==============================
+:: CONFIG
+:: ==============================
 set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\FPT_Installer.zip"
-set "ExtractPath=%DesktopPath%\"
-set "DownloadUrl=https://drive.usercontent.google.com/download?id=1F9pQy1Lv6Jq4zDnwzp8mB1Au6gSM1XLU&export=download&authuser=1&confirm=t&uuid=ed60bb2c-9436-4ea9-9ecc-b53d1977ea10&at=AEz70l7-z2bzrTbQrGoTaZ0gjm7L:1741399826501"
+set "ExtractPath=%DesktopPath%\FPT_Extract"
 
-echo Dang tai tep...
-curl "%DownloadUrl%" --output "%ZipFilePath%"
+:: Link latest (khuyên dùng)
+set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/latest/download/FPT_Installer.zip"
 
-if errorlevel 1 (
-    echo Khong the tai tep.
+:: ==============================
+:: DOWNLOAD
+:: ==============================
+echo.
+echo =====================================
+echo [1/4] DOWNLOADING...
+echo =====================================
+
+set RETRY=3
+set COUNT=0
+
+:download_retry
+set /a COUNT+=1
+echo [+] Attempt !COUNT!...
+
+curl -L --fail --retry 3 --retry-delay 2 ^
+--connect-timeout 15 --speed-time 15 --speed-limit 1000 ^
+-o "%ZipFilePath%" "%DownloadUrl%"
+
+if exist "%ZipFilePath%" (
+    echo [+] Download success!
+) else (
+    if !COUNT! lss %RETRY% (
+        echo [!] Retry download...
+        timeout /t 2 >nul
+        goto download_retry
+    ) else (
+        echo [X] Download FAILED!
+        pause
+        exit /b 1
+    )
+)
+
+:: ==============================
+:: VERIFY FILE
+:: ==============================
+for %%A in ("%ZipFilePath%") do set size=%%~zA
+if !size! LSS 100000 (
+    echo [X] File too small -> download error!
+    del "%ZipFilePath%" >nul 2>&1
     pause
     exit /b 1
 )
 
-echo Dang giai nen...
-powershell -Command "Expand-Archive -Path '%ZipFilePath%' -DestinationPath '%ExtractPath%' -Force"
+:: ==============================
+:: EXTRACT
+:: ==============================
+echo.
+echo =====================================
+echo [2/4] EXTRACTING...
+echo =====================================
+
+if exist "%ExtractPath%" rmdir /s /q "%ExtractPath%"
+mkdir "%ExtractPath%"
+
+powershell -NoProfile -Command ^
+"try { Expand-Archive -Path '%ZipFilePath%' -DestinationPath '%ExtractPath%' -Force } catch { exit 1 }"
 
 if errorlevel 1 (
-    echo Khong the giai nen.
+    echo [X] Extract FAILED!
     pause
     exit /b 1
 )
 
-echo Dang cai dat Tool FPT...
-for /r "%ExtractPath%" %%i in (FPT_Installer.exe) do (
-    set "ExePath=%%i" 
-    goto :run 
-) 
+echo [+] Extract success!
 
+:: ==============================
+:: FIND INSTALLER
+:: ==============================
+echo.
+echo =====================================
+echo [3/4] FINDING INSTALLER...
+echo =====================================
 
-echo Khong tim thay chuong trinh cai dat.
+set "ExePath="
+
+:: lấy file exe mới nhất
+for /f "delims=" %%i in ('dir "%ExtractPath%\*.exe" /b /a-d /o-d 2^>nul') do (
+    set "ExePath=%ExtractPath%\%%i"
+    goto found
+)
+
+:found
+if not defined ExePath (
+    echo [X] Installer not found!
+    pause
+    goto cleanup
+)
+
+echo [+] Found: !ExePath!
+
+:: ==============================
+:: INSTALL
+:: ==============================
+echo.
+echo =====================================
+echo [4/4] INSTALLING...
+echo =====================================
+
+start "" /wait "!ExePath!" /q
+
+if errorlevel 1 (
+    echo [!] Install returned error, trying fallback...
+    start "" /wait "!ExePath!" /silent /verysilent
+)
+
+echo [+] Install completed!
+
+:: ==============================
+:: CLEANUP
+:: ==============================
+:cleanup
+echo.
+echo =====================================
+echo CLEANING...
+echo =====================================
+
+if exist "%ZipFilePath%" del /f /q "%ZipFilePath%"
+if exist "%ExtractPath%" rmdir /s /q "%ExtractPath%"
+
+echo [+] Done!
 pause
-exit /b 1
-
-:run
-"%ExePath%" /q
-echo Da cai xong tool FPT.
-
-echo Dang xoa file cai dat...
-del "%ZipFilePath%"
-del "%ExePath%"
-
-if errorlevel 1 (
-    echo Khong the xoa file...
-    pause
-    exit /b 1
-)
-
-echo Da xoa file cai dat.
-
 endlocal
-pause

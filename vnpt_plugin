@@ -8,43 +8,27 @@ set "FileName=VNPT-CA.Plugin_Office_Setup_1.0.4.7_v4_SIGNED"
 set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\%FileName%.zip"
 set "ExtractPath=%DesktopPath%"
-set "ExtractedFolderPath=%DesktopPath%\%FileName%"
 
-:: Link latest (khuyên dùng)
 set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/latest/download/%FileName%.zip"
 
 :: ==============================
-:: DOWNLOAD (FAST + RETRY)
+:: DOWNLOAD
 :: ==============================
 echo.
 echo =====================================
 echo [1/4] DOWNLOADING...
 echo =====================================
 
-set RETRY=3
-set COUNT=0
-
-:download_retry
-set /a COUNT+=1
-echo [+] Attempt !COUNT!...
-
-curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 15 ^
---speed-time 15 --speed-limit 1000 ^
+curl -L --fail --retry 3 --retry-delay 2 ^
 -o "%ZipFilePath%" "%DownloadUrl%"
 
-if exist "%ZipFilePath%" (
-    echo [+] Download success!
-) else (
-    if !COUNT! lss %RETRY% (
-        echo [!] Retry download...
-        timeout /t 2 >nul
-        goto download_retry
-    ) else (
-        echo [X] Download FAILED after %RETRY% attempts!
-        pause
-        exit /b 1
-    )
+if not exist "%ZipFilePath%" (
+    echo [X] Download FAILED!
+    pause
+    exit /b 1
 )
+
+echo [+] Download success!
 
 :: ==============================
 :: EXTRACT
@@ -54,13 +38,8 @@ echo =====================================
 echo [2/4] EXTRACTING...
 echo =====================================
 
-if not exist "%ZipFilePath%" (
-    echo [X] File not found!
-    exit /b 1
-)
-
 powershell -NoProfile -Command ^
-"try { Expand-Archive -Path '%ZipFilePath%' -DestinationPath '%ExtractPath%' -Force } catch { exit 1 }"
+"Expand-Archive -Path '%ZipFilePath%' -DestinationPath '%ExtractPath%' -Force"
 
 if errorlevel 1 (
     echo [X] Extract FAILED!
@@ -71,7 +50,7 @@ if errorlevel 1 (
 echo [+] Extract success!
 
 :: ==============================
-:: FIND INSTALLER
+:: FIND INSTALLER (SMART)
 :: ==============================
 echo.
 echo =====================================
@@ -80,14 +59,15 @@ echo =====================================
 
 set "ExePath="
 
-for /f "delims=" %%i in ('dir /b /s "%ExtractedFolderPath%\VNPT*.exe" 2^>nul') do (
-    set "ExePath=%%i"
+:: Lấy file mới nhất theo thời gian
+for /f "delims=" %%i in ('dir "%DesktopPath%\VNPT-CA*.exe" /b /a-d /o-d 2^>nul') do (
+    set "ExePath=%DesktopPath%\%%i"
     goto found_exe
 )
 
 :found_exe
 if not defined ExePath (
-    echo [X] Installer not found!
+    echo [X] Installer not found on Desktop!
     pause
     goto cleanup
 )
@@ -105,7 +85,7 @@ echo =====================================
 start "" /wait "!ExePath!" /silent /FORCECLOSEAPPLICATIONS
 
 if errorlevel 1 (
-    echo [!] Installer returned error (may still installed).
+    echo [!] Installer returned error (may still installed)
 ) else (
     echo [+] Install completed!
 )
@@ -119,20 +99,8 @@ echo =====================================
 echo CLEANING...
 echo =====================================
 
-if exist "%ZipFilePath%" (
-    del /f /q "%ZipFilePath%"
-    echo [+] Deleted ZIP
-)
+if exist "%ZipFilePath%" del /f /q "%ZipFilePath%"
 
-if exist "%ExtractedFolderPath%" (
-    rmdir /s /q "%ExtractedFolderPath%"
-    echo [+] Deleted extracted folder
-)
-
-echo.
-echo =====================================
-echo DONE!
-echo =====================================
-
+echo [+] Done!
 pause
 endlocal

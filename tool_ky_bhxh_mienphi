@@ -1,43 +1,95 @@
 @echo off
-setlocal
+setlocal enabledelayedexpansion
 
-:: ====== CONFIG ======
+:: ==============================
+:: CONFIG
+:: ==============================
 set "FILE=%TEMP%\vss_setup.exe"
 set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/download/VNPT_Tool/vss-declaration-Setup_2.0.6.70.exe"
 
-:: ====== DOWNLOAD ======
-echo Dang tai file cai dat...
-curl -L -# "%DownloadUrl%" -o "%FILE%"
+:: ==============================
+:: DOWNLOAD (RETRY + FAST)
+:: ==============================
+echo.
+echo =====================================
+echo [1/3] DOWNLOADING...
+echo =====================================
 
-if not exist "%FILE%" (
-    echo Khong the tai tep.
-    pause
-    exit /b 1
-)
+set RETRY=3
+set COUNT=0
 
-echo Tai thanh cong!
+:download_retry
+set /a COUNT+=1
+echo [+] Attempt !COUNT!...
 
-:: ====== INSTALL ======
-echo Dang cai dat tool ky BHXH mien phi...
-start /wait "" "%FILE%" /quiet /norestart
-
-if errorlevel 1 (
-    echo Cai dat tool that bai.
-    pause
-    exit /b 1
-)
-
-echo Cai dat thanh cong!
-
-:: ====== CLEAN ======
-echo Dang xoa file cai dat...
-del /f /q "%FILE%"
+curl -L --fail --retry 3 --retry-delay 2 ^
+--connect-timeout 15 --speed-time 15 --speed-limit 1000 ^
+-o "%FILE%" "%DownloadUrl%"
 
 if exist "%FILE%" (
-    echo Khong the xoa file...
+    echo [+] Download success!
 ) else (
-    echo Da xoa file cai dat.
+    if !COUNT! lss %RETRY% (
+        echo [!] Retry download...
+        timeout /t 2 >nul
+        goto download_retry
+    ) else (
+        echo [X] Download FAILED after %RETRY% attempts!
+        pause
+        exit /b 1
+    )
 )
 
-endlocal
+:: ==============================
+:: VERIFY FILE (basic)
+:: ==============================
+for %%A in ("%FILE%") do set size=%%~zA
+if %size% LSS 100000 (
+    echo [X] File size too small -> download may be invalid!
+    del "%FILE%" >nul 2>&1
+    pause
+    exit /b 1
+)
+
+:: ==============================
+:: INSTALL
+:: ==============================
+echo.
+echo =====================================
+echo [2/3] INSTALLING...
+echo =====================================
+
+start "" /wait "%FILE%" /quiet /norestart
+
+if errorlevel 1 (
+    echo [!] Install returned error, trying fallback...
+    start "" /wait "%FILE%" /SILENT /VERYSILENT
+)
+
+echo [+] Install completed!
+
+:: ==============================
+:: CLEANUP
+:: ==============================
+echo.
+echo =====================================
+echo [3/3] CLEANING...
+echo =====================================
+
+if exist "%FILE%" (
+    del /f /q "%FILE%"
+)
+
+if exist "%FILE%" (
+    echo [!] Cannot delete file.
+) else (
+    echo [+] Deleted installer.
+)
+
+echo.
+echo =====================================
+echo DONE!
+echo =====================================
+
 pause
+endlocal

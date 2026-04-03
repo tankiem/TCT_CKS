@@ -1,70 +1,66 @@
-# ===== TLS =====
+# ===== TLS & ASSEMBLIES =====
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# ===== CONFIG TOOL =====
-# Đã thêm [ordered] để danh sách hiển thị đúng thứ tự từ trên xuống dưới
+# ===== DANH SÁCH TOOL TỔNG HỢP =====
 $TOOLS = [ordered]@{
-    "NCCA" = @{
-        url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/fb250b28dc42adc15086a8514e8027fec7af5426/ncca_csp11_v1_installer_full.zip"
-        type = "zip"
-        silent = "/S"
-    }
-    "Viettel" = @{
-        url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/Token_manager/viettel-ca_v6.zip"
-        type = "zip"
-        silent = "/S"
-    }
-    "FastCA" = @{
-        url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/fb250b28dc42adc15086a8514e8027fec7af5426/Setup%20FAST.exe.zip"
-        type = "zip"
-        silent = "/SILENT"
-    }
-    "eSigner" = @{
-        url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/esigner.cmd"
-        type = "cmd"
-    }
-    "CTHub" = @{
-        url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/CTSigningHub.bat"
-        type = "cmd"
-    }
+    "1. Cài đặt Foxit Reader" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/install_foxit_reader.cmd"; type = "cmd" }
+    "2. Cài đặt Java 8.121" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/install_java8.cmd"; type = "cmd" }
+    "3. Cài đặt Java 7.3" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/install_java7.cmd"; type = "cmd" }
+    "4. Cài tool FPT" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/FPT_install.cmd"; type = "cmd" }
+    "5. Cài plugin VNPT" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/vnpt_plugin"; type = "cmd" }
+    "6. Cài tool ký BHXH free" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/tool_ky_bhxh_mienphi"; type = "cmd" }
+    "7. Token: NCCA" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/fb250b28dc42adc15086a8514e8027fec7af5426/ncca_csp11_v1_installer_full.zip"; type = "zip"; silent = "/S" }
+    "8. Token: Viettel" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/Token_manager/viettel-ca_v6.zip"; type = "zip"; silent = "/S" }
+    "9. Token: FastCA" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/fb250b28dc42adc15086a8514e8027fec7af5426/Setup%20FAST.exe.zip"; type = "zip"; silent = "/SILENT" }
+    "10. Esigner (Thuế ĐT)" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/esigner.cmd"; type = "cmd" }
+    "11. CTSigningHub (DVC)" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/CTSigningHub.bat"; type = "cmd" }
 }
 
-# ===== FORM =====
+# ===== FORM SETTINGS =====
 $form = New-Object Windows.Forms.Form
-$form.Text = "Token Manager"
-$form.Size = '600,550'
+$form.Text = "Tool Setup Tổng Hợp"
+$form.Size = '600,600'
 $form.StartPosition = "CenterScreen"
-# Thêm thuộc tính này để code Form hiển thị mượt hơn ở một số độ phân giải
 $form.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::Font 
 
-# ===== CHECKBOX =====
+# ===== CHECKBOX (CHIA 2 CỘT) =====
 $checkboxes = @{}
+$x = 20
 $y = 20
+$count = 0
 
 foreach ($name in $TOOLS.Keys) {
     $cb = New-Object Windows.Forms.CheckBox
     $cb.Text = $name
-    $cb.Location = "20,$y"
-    $cb.AutoSize = $true # Cho phép checkbox tự dãn theo độ dài chữ
+    $cb.Location = "$x,$y"
+    $cb.AutoSize = $true
     $form.Controls.Add($cb)
     $checkboxes[$name] = $cb
+    
     $y += 30
+    $count++
+    
+    # Đủ 6 mục ở cột 1 thì đẩy sang cột 2
+    if ($count -eq 6) {
+        $x = 300
+        $y = 20
+    }
 }
 
 # ===== BUTTON =====
 $btn = New-Object Windows.Forms.Button
-$btn.Text = "Cài đặt"
-$btn.Location = "20,$y"
+$btn.Text = "Cài đặt các mục đã chọn"
+$btn.Location = "20,210"
+$btn.Size = "180,30"
 $form.Controls.Add($btn)
 
 # ===== LOG =====
 $logBox = New-Object Windows.Forms.TextBox
 $logBox.Multiline = $true
 $logBox.ScrollBars = "Vertical"
-$logBox.Location = "20,200"
+$logBox.Location = "20,260"
 $logBox.Size = "540,280"
 $logBox.Font = "Consolas,9"
 $form.Controls.Add($logBox)
@@ -72,7 +68,6 @@ $form.Controls.Add($logBox)
 # ===== LOG FUNCTION =====
 function Log($msg) {
     $logBox.AppendText("$msg`r`n")
-    # Thay vì chỉ Refresh, DoEvents giúp Form không bị đơ trong lúc tải/cài đặt
     [System.Windows.Forms.Application]::DoEvents() 
 }
 
@@ -81,17 +76,14 @@ function Install-Tool($name, $cfg) {
     try {
         Log("==== $name ====")
         
-        # Xác định đuôi file dựa vào type
         $ext = if ($cfg.type -eq "zip") { ".zip" } else { ".cmd" }
-        $file = "$env:TEMP\$name$ext"
-        $outFolder = "$env:TEMP\$name-out"
+        $file = "$env:TEMP\temp_setup_file$ext"
+        $outFolder = "$env:TEMP\temp_setup_out"
 
-        # download
         Log("⬇️ Đang tải...")
         Invoke-WebRequest $cfg.url -OutFile $file -UseBasicParsing
 
         if ($cfg.type -eq "zip") {
-            # Xóa thư mục giải nén cũ nếu còn tồn tại
             if (Test-Path $outFolder) { Remove-Item $outFolder -Recurse -Force }
             
             Log("📦 Đang giải nén...")
@@ -106,30 +98,26 @@ function Install-Tool($name, $cfg) {
             Log("🚀 Đang cài đặt ($($exe.Name))...")
             $p = Start-Process $exe.FullName -ArgumentList $cfg.silent -PassThru -Wait
 
-            Start-Sleep 2 # Chờ thêm 1 chút để hệ thống ổn định sau cài đặt
+            Start-Sleep 2 
             
-            # Dọn dẹp rác sau khi cài xong
             Remove-Item $outFolder -Recurse -Force -ErrorAction SilentlyContinue
             
         } else {
             Log("🚀 Đang chạy script...")
-            # Truyền tham số an toàn hơn bằng ArgumentList
             $p = Start-Process "cmd.exe" -ArgumentList "/c `"$file`"" -PassThru -Wait
         }
 
-        # Dọn dẹp file tải về
         Remove-Item $file -Force -ErrorAction SilentlyContinue
 
-        Log("✔ $name thành công!")
+        Log("✔ Thành công!")
     }
     catch {
-        Log("❌ $name lỗi: $($_.Exception.Message)")
+        Log("❌ Lỗi: $($_.Exception.Message)")
     }
 }
 
 # ===== BUTTON CLICK =====
 $btn.Add_Click({
-    # Vô hiệu hóa nút nhấn để tránh người dùng bấm 2 lần
     $btn.Enabled = $false
     Log("🚀 BẮT ĐẦU XỬ LÝ...")
 
@@ -142,7 +130,7 @@ $btn.Add_Click({
 
     Log("===== HOÀN TẤT =====")
     $btn.Enabled = $true
-    [System.Windows.Forms.MessageBox]::Show("Quá trình xử lý đã xong!", "Thông báo", 0, [System.Windows.Forms.MessageBoxIcon]::Information)
+    [System.Windows.Forms.MessageBox]::Show("Quá trình cài đặt đã hoàn tất!", "Thông báo", 0, [System.Windows.Forms.MessageBoxIcon]::Information)
 })
 
 # Chạy Form

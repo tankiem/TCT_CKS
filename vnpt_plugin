@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 :: ==============================
 :: CONFIG
 :: ==============================
-set "FileName=VNPT-CA.Plugin_Office_Setup_1.0.4.7_v4_SIGNED"
+set "FileName=VNPT-CA.Plugin_Office_Setup.1.0.5.0"
 set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\%FileName%.zip"
 set "ExtractPath=%DesktopPath%"

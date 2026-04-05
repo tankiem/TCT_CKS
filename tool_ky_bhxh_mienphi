@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 :: CONFIG
 :: ==============================
 set "FILE=%TEMP%\vss_setup.exe"
-set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/download/VNPT_Tool/vss-declaration-Setup_2.0.6.70.exe"
+set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/download/VNPT_Tool/vss-declaration-Setup_2.0.7.19.exe"
 
 :: ==============================
 :: DOWNLOAD (RETRY + FAST)

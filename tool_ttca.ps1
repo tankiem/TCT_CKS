@@ -1,165 +1,178 @@
-# ===== TLS, ASSEMBLIES & PREFERENCES =====
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+# Yêu cầu chạy PowerShell với quyền Administrator
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Warning "Vui lòng chạy PowerShell với quyền Administrator (Run as Administrator) để script có thể cài đặt phần mềm!"
+    Break
+}
+
+# Load thư viện để tạo giao diện GUI
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# Tắt Progress Bar của PowerShell để tăng tốc độ Download (Rất quan trọng)
-$ProgressPreference = 'SilentlyContinue'
-
-# Bật giao diện Windows hiện đại (Visual Styles)
-[System.Windows.Forms.Application]::EnableVisualStyles()
-
-# ===== DANH SÁCH TOOL =====
-$TOOLS = [ordered]@{
-    "1. Foxit Reader" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/install_foxit_reader.cmd"; type = "cmd" }
-    "2. Java 8" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/install_java8.cmd"; type = "cmd" }
-    "3. Java 7" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/install_java7.cmd"; type = "cmd" }
-    "4. Tool gen FPT" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/FPT_Installer.zip"; type = "zip"; silent = "/S" }
-    "5. Plugin VNPT Office" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT-CA.Plugin_Office_Setup.1.0.5.0.zip"; type = "zip"; silent = "/S" }
-    "6. Plugin BHXH Free" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/vss-declaration-Setup_2.0.7.19.exe"; type = "exe"; silent = "/S" }
-    "7. Token NCCA" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/ncca_csp11_v1_installer_full.zip"; type = "zip"; silent = "/S" }
-    "8. Token Viettel V6" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-ca_v6.zip"; type = "zip"; silent = "/S" }
-    "9. Token FASTCA" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/Setup.FAST.zip"; type = "zip"; silent = "/SILENT" }
-    "10. Plugin eSigner" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/eSigner_1.1.0_setup.zip"; type = "zip"; silent = "/S" }
-    "11. CTSigningHub" = @{ url = "https://raw.githubusercontent.com/tankiem/TCT_CKS/refs/heads/main/CTSigningHub.bat"; type = "cmd" }
-    "12. iTaxViewer" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/iTaxViewer2.7.2_v1.zip"; type = "zip"; silent = "/S" }
-    "13. SFive Browser" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/SFive-Browser.exe"; type = "exe"; silent = "/S" }
-    "14. Tool Ky Kho Bac" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/SignatureAppXp_Setup_2.0.zip"; type = "zip"; silent = "/S" }
-    "15. Tool Ky Hoa Don Viettel" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-tool-ki-so-1.0.1.exe"; type = "exe"; silent = "/S" }
-    "16. Tool Gen VNPT CAMS" = @{ url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT_CAMS_Plugin_Setup.exe"; type = "exe"; silent = "/S" }
-}
-
-# ===== FORM =====
-$form = New-Object Windows.Forms.Form
-$form.Text = "Tool Setup Tong Hop"
+# Cấu hình cửa sổ chính
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Tool Hỗ Trợ Khách Hàng - Cài Đặt CKS & Thuế"
+$form.Size = New-Object System.Drawing.Size(550, 600)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedDialog"
 $form.MaximizeBox = $false
 
-# ===== CHECKBOX =====
-$checkboxes = @{}
-$x = 20
-$y = 20
-$colCount = 0
+# Tiêu đề danh sách
+$lblTitle = New-Object System.Windows.Forms.Label
+$lblTitle.Text = "Tích chọn các phần mềm cần tải và cài đặt:"
+$lblTitle.Location = New-Object System.Drawing.Point(20, 15)
+$lblTitle.AutoSize = $true
+$lblTitle.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
+$form.Controls.Add($lblTitle)
 
-# Tự động chia đều 2 cột
-$itemsPerCol = [math]::Ceiling($TOOLS.Count / 2)
+# Danh sách Checkbox
+$checkListBox = New-Object System.Windows.Forms.CheckedListBox
+$checkListBox.Location = New-Object System.Drawing.Point(20, 40)
+$checkListBox.Size = New-Object System.Drawing.Size(490, 250)
+$checkListBox.CheckOnClick = $true
+$form.Controls.Add($checkListBox)
 
-foreach ($name in $TOOLS.Keys) {
-    $cb = New-Object Windows.Forms.CheckBox
-    $cb.Text = $name
-    $cb.Location = "$x,$y"
-    $cb.AutoSize = $true
-    $form.Controls.Add($cb)
-    $checkboxes[$name] = $cb
+# Danh sách phần mềm đã sắp xếp theo nhóm 1-4 (Đã bỏ Sfive và HTKK)
+$softwareList = @(
+    # --- NHÓM 1 ---
+    @{ Name = "1. Tool gen FPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/FPT_Installer.zip" },
+    @{ Name = "1. Tool gen VNPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT_CAMS_Plugin_Setup.exe" },
     
-    $y += 30
-    $colCount++
+    # --- NHÓM 2 ---
+    @{ Name = "2. Plugin thuế - dvc"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/eSigner_1.1.0_setup.zip" },
+    @{ Name = "2. Tool ký kho bạc"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/SignatureAppXp_Setup_2.0.zip" },
+    @{ Name = "2. Tool ký hóa đơn Viettel"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-tool-ki-so-1.0.1.exe" },
+    @{ Name = "2. Tool ký hóa đơn VNPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT-CA.Plugin_Office_Setup.1.0.5.0.zip" },
+    @{ Name = "2. Tool BHXH free"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/vss-declaration-Setup_2.0.7.19.exe" },
+    
+    # --- NHÓM 3 ---
+    @{ Name = "3. Phần mềm token NCCA"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/ncca_csp11_v1_installer_full.zip" },
+    @{ Name = "3. Phần mềm token FASTCA"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/Setup.FAST.zip" },
+    @{ Name = "3. Phần mềm token Viettel V6"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-ca_v6.zip" },
+    
+    # --- NHÓM 4 ---
+    @{ Name = "4. Phần mềm đọc xml"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/iTaxViewer2.7.2_v1.zip" },
+    @{ Name = "4. Phần mềm ký PDF"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/FoxitPDFReader1212_enu_Setup_Prom.exe" },
+    @{ Name = "4. Phần mềm Java 7u3"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/jre-7u3-windows-i586.zip" },
+    @{ Name = "4. Phần mềm Java 8u121"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/jre-8u121-windows-i586.zip" }
+)
 
-    if ($colCount -ge $itemsPerCol) {
-        $x = 320
-        $y = 20
-        $colCount = 0
+# Thêm dữ liệu vào Checkbox List
+foreach ($app in $softwareList) {
+    [void]$checkListBox.Items.Add($app.Name)
+}
+
+# Nút Chọn tất cả
+$btnSelectAll = New-Object System.Windows.Forms.Button
+$btnSelectAll.Text = "Chọn tất cả"
+$btnSelectAll.Location = New-Object System.Drawing.Point(20, 300)
+$btnSelectAll.Size = New-Object System.Drawing.Size(100, 30)
+$btnSelectAll.Add_Click({
+    for ($i = 0; $i -lt $checkListBox.Items.Count; $i++) {
+        $checkListBox.SetItemChecked($i, $true)
     }
+})
+$form.Controls.Add($btnSelectAll)
+
+# Nút Bỏ chọn tất cả
+$bDeselectAll = New-Object System.Windows.Forms.Button
+$bDeselectAll.Text = "Bỏ chọn"
+$bDeselectAll.Location = New-Object System.Drawing.Point(130, 300)
+$bDeselectAll.Size = New-Object System.Drawing.Size(100, 30)
+$bDeselectAll.Add_Click({
+    for ($i = 0; $i -lt $checkListBox.Items.Count; $i++) {
+        $checkListBox.SetItemChecked($i, $false)
+    }
+})
+$form.Controls.Add($bDeselectAll)
+
+# Nút Cài Đặt
+$btnInstall = New-Object System.Windows.Forms.Button
+$btnInstall.Text = "Thực hiện Tải & Cài đặt"
+$btnInstall.Location = New-Object System.Drawing.Point(360, 300)
+$btnInstall.Size = New-Object System.Drawing.Size(150, 30)
+$btnInstall.BackColor = "LightGreen"
+$form.Controls.Add($btnInstall)
+
+# Hộp text hiển thị Log trạng thái
+$txtLog = New-Object System.Windows.Forms.TextBox
+$txtLog.Location = New-Object System.Drawing.Point(20, 340)
+$txtLog.Size = New-Object System.Drawing.Size(490, 200)
+$txtLog.Multiline = $true
+$txtLog.ScrollBars = "Vertical"
+$txtLog.ReadOnly = $true
+$form.Controls.Add($txtLog)
+
+# Hàm ghi Log lên giao diện
+function Write-Log {
+    param([string]$Message)
+    $txtLog.AppendText("$(Get-Date -Format 'HH:mm:ss') - $Message `r`n")
+    $txtLog.SelectionStart = $txtLog.Text.Length
+    $txtLog.ScrollToCaret()
+    [System.Windows.Forms.Application]::DoEvents() # Giữ giao diện không bị treo
 }
 
-# Tự động tính tọa độ Y cho nút bấm và log để không bị đè
-$bottomY = ($itemsPerCol * 30) + 30
+# Xử lý sự kiện khi bấm nút Cài đặt
+$btnInstall.Add_Click({
+    $selectedItems = $checkListBox.CheckedItems
+    if ($selectedItems.Count -eq 0) {
+        [System.Windows.Forms.MessageBox]::Show("Vui lòng chọn ít nhất 1 phần mềm!", "Thông báo", 0, [System.Windows.Forms.MessageBoxIcon]::Warning)
+        return
+    }
 
-# ===== BUTTON =====
-$btn = New-Object Windows.Forms.Button
-$btn.Text = "Cai dat cac muc da chon"
-$btn.Location = New-Object System.Drawing.Point(20, $bottomY)
-$btn.Size = "250,35"
-$form.Controls.Add($btn)
+    $btnInstall.Enabled = $false # Khóa nút tránh bấm nhiều lần
+    $installDir = "C:\CKS_AutoInstall"
+    
+    if (!(Test-Path $installDir)) { 
+        New-Item -ItemType Directory -Path $installDir | Out-Null 
+    }
+    Write-Log "Đã khởi tạo thư mục lưu trữ: $installDir"
 
-# ===== LOG =====
-$logY = $bottomY + 45
-$logBox = New-Object Windows.Forms.TextBox
-$logBox.Multiline = $true
-$logBox.ScrollBars = "Vertical"
-$logBox.Location = New-Object System.Drawing.Point(20, $logY)
-$logBox.Size = "600, 250"
-$logBox.Font = "Consolas,9"
-$form.Controls.Add($logBox)
-
-# Resize form khớp với nội dung
-$form.ClientSize = New-Object System.Drawing.Size(640, ($logY + 270))
-
-function Log($msg) {
-    $logBox.AppendText("$msg`r`n")
-    # Cuộn xuống dòng cuối cùng
-    $logBox.SelectionStart = $logBox.Text.Length
-    $logBox.ScrollToCaret()
-    [System.Windows.Forms.Application]::DoEvents()
-}
-
-# ===== INSTALL FUNCTION =====
-function Install-Tool($name, $cfg) {
-    # Dùng GUID tạo tên file độc nhất, tránh lỗi trùng lặp / locked file
-    $uniqueId = [guid]::NewGuid().ToString().Substring(0,8)
-    $file = "$env:TEMP\setup_$uniqueId.$($cfg.type)"
-    $outFolder = "$env:TEMP\out_$uniqueId"
-
-    try {
-        Log("==== $name ====")
-        Log("Downloading...")
-        Invoke-WebRequest $cfg.url -OutFile $file -UseBasicParsing -ErrorAction Stop
-
-        if ($cfg.type -eq "zip") {
-            Log("Extracting...")
-            Expand-Archive $file -DestinationPath $outFolder -Force -ErrorAction Stop
-
-            $exe = Get-ChildItem $outFolder -Filter *.exe -Recurse | Select-Object -First 1
-
-            if (-not $exe) { throw "Khong tim thay file .exe trong file zip" }
-
-            Log("Installing: $($exe.Name)")
-            $process = Start-Process $exe.FullName -ArgumentList $cfg.silent -Wait -PassThru
-            if ($process.ExitCode -ne 0 -and $process.ExitCode -ne $null) {
-                Log("Warning: Process exited with code $($process.ExitCode)")
+    foreach ($itemName in $selectedItems) {
+        # Tìm phần mềm tương ứng trong mảng dựa trên tên
+        $app = $softwareList | Where-Object { $_.Name -eq $itemName }
+        if ($app) {
+            try {
+                $fileName = [System.IO.Path]::GetFileName($app.Url)
+                $filePath = Join-Path $installDir $fileName
+                
+                Write-Log "Đang tải xuống: $($app.Name)..."
+                Invoke-WebRequest -Uri $app.Url -OutFile $filePath -UseBasicParsing
+                
+                # Cập nhật xử lý file .exe
+                if ($fileName.EndsWith(".exe")) {
+                    if ($fileName -match "viettel-tool-ki-so") {
+                        Write-Log "Đang cài đặt ẩn $($app.Name) với tham số /Q..."
+                        Start-Process -FilePath $filePath -ArgumentList "/Q" -Wait -NoNewWindow
+                    } else {
+                        Write-Log "Đang cài đặt ẩn $($app.Name)..."
+                        Start-Process -FilePath $filePath -ArgumentList "/S", "/VERYSILENT", "/quiet" -Wait -NoNewWindow
+                    }
+                    Write-Log "Hoàn thành xử lý $($app.Name)."
+                }
+                elseif ($fileName.EndsWith(".zip")) {
+                    $extractPath = Join-Path $installDir $fileName.Replace(".zip", "")
+                    Write-Log "Đang giải nén $($app.Name)..."
+                    Expand-Archive -Path $filePath -DestinationPath $extractPath -Force
+                    
+                    $setupFiles = Get-ChildItem -Path $extractPath -Include *.exe, *.msi -Recurse
+                    foreach ($setup in $setupFiles) {
+                        Write-Log "Đang cài đặt $($setup.Name)..."
+                        if ($setup.Extension -eq ".msi") {
+                            Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$($setup.FullName)`" /qn" -Wait -NoNewWindow
+                        } else {
+                            Start-Process -FilePath $setup.FullName -ArgumentList "/S", "/VERYSILENT", "/quiet" -Wait -NoNewWindow
+                        }
+                        Write-Log "Hoàn thành cài đặt $($setup.Name)."
+                    }
+                }
+            } catch {
+                Write-Log "LỖI khi xử lý $($app.Name): $($_.Exception.Message)"
             }
-
-        } elseif ($cfg.type -eq "exe") {
-            Log("Installing EXE...")
-            Start-Process $file -ArgumentList $cfg.silent -Wait
-
-        } elseif ($cfg.type -eq "cmd") {
-            Log("Running CMD...")
-            Start-Process "cmd.exe" -ArgumentList "/c `"$file`"" -Wait
-        }
-
-        Log("Success")
-    } catch {
-        Log("Error: $($_.Exception.Message)")
-    } finally {
-        # Dọn dẹp rác (Luôn chạy kể cả khi có lỗi)
-        Remove-Item $file -Force -ErrorAction SilentlyContinue
-        if (Test-Path $outFolder) { Remove-Item $outFolder -Recurse -Force -ErrorAction SilentlyContinue }
-    }
-}
-
-# ===== CLICK =====
-$btn.Add_Click({
-    $btn.Enabled = $false
-    Log("Start installing...")
-
-    $selectedAny = $false
-    foreach ($name in $TOOLS.Keys) {
-        if ($checkboxes[$name].Checked) {
-            $selectedAny = $true
-            Install-Tool $name $TOOLS[$name]
-            Log("----------------------")
         }
     }
-
-    if (-not $selectedAny) {
-        Log("Ban chua chon tool nao!")
-    } else {
-        Log("Done")
-        [System.Windows.Forms.MessageBox]::Show("Da cai dat hoan tat!", "Thong bao", 0, [System.Windows.Forms.MessageBoxIcon]::Information)
-    }
-    $btn.Enabled = $true
+    Write-Log "====== TẤT CẢ ĐÃ HOÀN TẤT ======"
+    $btnInstall.Enabled = $true
 })
 
-$form.ShowDialog() | Out-Null
+# Hiển thị giao diện
+[void]$form.ShowDialog()

@@ -10,7 +10,7 @@ Add-Type -AssemblyName System.Drawing
 
 # Cấu hình cửa sổ chính
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Tool Hỗ Trợ Khách Hàng - Cài Đặt CKS & Thuế"
+$form.Text = "Tool Hỗ Trợ Khách Hàng - Cài Đặt & Khởi Chạy CKS"
 $form.Size = New-Object System.Drawing.Size(550, 600)
 $form.StartPosition = "CenterScreen"
 $form.FormBorderStyle = "FixedDialog"
@@ -18,7 +18,7 @@ $form.MaximizeBox = $false
 
 # Tiêu đề danh sách
 $lblTitle = New-Object System.Windows.Forms.Label
-$lblTitle.Text = "Tích chọn các phần mềm cần tải và cài đặt:"
+$lblTitle.Text = "Tích chọn các phần mềm cần tải, cài đặt và khởi chạy:"
 $lblTitle.Location = New-Object System.Drawing.Point(20, 15)
 $lblTitle.AutoSize = $true
 $lblTitle.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
@@ -31,29 +31,30 @@ $checkListBox.Size = New-Object System.Drawing.Size(490, 250)
 $checkListBox.CheckOnClick = $true
 $form.Controls.Add($checkListBox)
 
-# Danh sách phần mềm đã sắp xếp theo nhóm 1-4 (Đã bỏ Sfive và HTKK)
+# Danh sách phần mềm đã sắp xếp theo nhóm 1-4
+# LƯU Ý: Phần RunPath là thông tin dự đoán ngoài nguồn dữ liệu, bạn cần xác minh lại đường dẫn thực tế (.exe) của từng app.
 $softwareList = @(
     # --- NHÓM 1 ---
-    @{ Name = "1. Tool gen FPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/FPT_Installer.zip" },
-    @{ Name = "1. Tool gen VNPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT_CAMS_Plugin_Setup.exe" },
+    @{ Name = "1. Tool gen FPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/FPT_Installer.zip"; RunPath = "C:\Program Files (x86)\FPT-CA\FPT-CA.exe" },
+    @{ Name = "1. Tool gen VNPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT_CAMS_Plugin_Setup.exe"; RunPath = "C:\Program Files (x86)\VNPT-CA\VNPT CAMS Plugin.exe" },
     
     # --- NHÓM 2 ---
-    @{ Name = "2. Plugin thuế - dvc"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/eSigner_1.1.0_setup.zip" },
-    @{ Name = "2. Tool ký kho bạc"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/SignatureAppXp_Setup_2.0.zip" },
-    @{ Name = "2. Tool ký hóa đơn Viettel"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-tool-ki-so-1.0.1.exe" },
-    @{ Name = "2. Tool ký hóa đơn VNPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT-CA.Plugin_Office_Setup.1.0.5.0.zip" },
-    @{ Name = "2. Tool BHXH free"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/vss-declaration-Setup_2.0.7.19.exe" },
+    @{ Name = "2. Plugin thuế - dvc"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/eSigner_1.1.0_setup.zip"; RunPath = "C:\Program Files (x86)\eSigner\eSigner.exe" },
+    @{ Name = "2. Tool ký kho bạc"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/SignatureAppXp_Setup_2.0.zip"; RunPath = "C:\Program Files (x86)\SignatureAppXp\SignatureAppXp.exe" },
+    @{ Name = "2. Tool ký hóa đơn Viettel"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-tool-ki-so-1.0.1.exe"; RunPath = "C:\Program Files (x86)\Viettel\Viettel SInvoice Tool\Viettel SInvoice Tool.exe" },
+    @{ Name = "2. Tool ký hóa đơn VNPT"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT-CA.Plugin_Office_Setup.1.0.5.0.zip"; RunPath = "" },
+    @{ Name = "2. Tool BHXH free"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/vss-declaration-Setup_2.0.7.19.exe"; RunPath = "C:\Program Files (x86)\VSS\VSS Declaration\VssDeclaration.exe" },
     
     # --- NHÓM 3 ---
-    @{ Name = "3. Phần mềm token NCCA"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/ncca_csp11_v1_installer_full.zip" },
-    @{ Name = "3. Phần mềm token FASTCA"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/Setup.FAST.zip" },
-    @{ Name = "3. Phần mềm token Viettel V6"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-ca_v6.zip" },
+    @{ Name = "3. Phần mềm token NCCA"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/ncca_csp11_v1_installer_full.zip"; RunPath = "C:\Program Files (x86)\NCCA\NCCA Token Manager\ncca_mgr.exe" },
+    @{ Name = "3. Phần mềm token FASTCA"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/Setup.FAST.zip"; RunPath = "C:\Program Files (x86)\FASTCA\FASTCA Token Manager\fastca_mgr.exe" },
+    @{ Name = "3. Phần mềm token Viettel V6"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/viettel-ca_v6.zip"; RunPath = "C:\Program Files (x86)\Viettel-CA\Viettel-CA Token Manager\viettel-ca_mgr.exe" },
     
     # --- NHÓM 4 ---
-    @{ Name = "4. Phần mềm đọc xml"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/iTaxViewer2.7.2_v1.zip" },
-    @{ Name = "4. Phần mềm ký PDF"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/FoxitPDFReader1212_enu_Setup_Prom.exe" },
-    @{ Name = "4. Phần mềm Java 7u3"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/jre-7u3-windows-i586.zip" },
-    @{ Name = "4. Phần mềm Java 8u121"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/jre-8u121-windows-i586.zip" }
+    @{ Name = "4. Phần mềm đọc xml"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/iTaxViewer2.7.2_v1.zip"; RunPath = "C:\Program Files (x86)\iTaxViewer\iTaxViewer.exe" },
+    @{ Name = "4. Phần mềm ký PDF"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/FoxitPDFReader1212_enu_Setup_Prom.exe"; RunPath = "C:\Program Files (x86)\Foxit Software\Foxit PDF Reader\FoxitPDFReader.exe" },
+    @{ Name = "4. Phần mềm Java 7u3"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/jre-7u3-windows-i586.zip"; RunPath = "" }, 
+    @{ Name = "4. Phần mềm Java 8u121"; Url = "https://github.com/tankiem/TCT_CKS/releases/latest/download/jre-8u121-windows-i586.zip"; RunPath = "" }
 )
 
 # Thêm dữ liệu vào Checkbox List
@@ -111,6 +112,19 @@ function Write-Log {
     [System.Windows.Forms.Application]::DoEvents() # Giữ giao diện không bị treo
 }
 
+# Hàm khởi chạy phần mềm sau khi cài
+function Start-InstalledApp {
+    param($AppObj)
+    if (![string]::IsNullOrEmpty($AppObj.RunPath)) {
+        if (Test-Path $AppObj.RunPath) {
+            Write-Log "Đang khởi chạy $($AppObj.Name)..."
+            Start-Process -FilePath $AppObj.RunPath -NoNewWindow
+        } else {
+            Write-Log "Cảnh báo: Không tìm thấy file khởi chạy tại $($AppObj.RunPath) cho $($AppObj.Name)."
+        }
+    }
+}
+
 # Xử lý sự kiện khi bấm nút Cài đặt
 $btnInstall.Add_Click({
     $selectedItems = $checkListBox.CheckedItems
@@ -138,7 +152,7 @@ $btnInstall.Add_Click({
                 Write-Log "Đang tải xuống: $($app.Name)..."
                 Invoke-WebRequest -Uri $app.Url -OutFile $filePath -UseBasicParsing
                 
-                # Cập nhật xử lý file .exe
+                # Xử lý file .exe trực tiếp
                 if ($fileName.EndsWith(".exe")) {
                     if ($fileName -match "viettel-tool-ki-so") {
                         Write-Log "Đang cài đặt ẩn $($app.Name) với tham số /Q..."
@@ -148,7 +162,9 @@ $btnInstall.Add_Click({
                         Start-Process -FilePath $filePath -ArgumentList "/S", "/VERYSILENT", "/quiet" -Wait -NoNewWindow
                     }
                     Write-Log "Hoàn thành xử lý $($app.Name)."
+                    Start-InstalledApp -AppObj $app # Gọi hàm khởi chạy
                 }
+                # Xử lý file .zip
                 elseif ($fileName.EndsWith(".zip")) {
                     $extractPath = Join-Path $installDir $fileName.Replace(".zip", "")
                     Write-Log "Đang giải nén $($app.Name)..."
@@ -160,10 +176,17 @@ $btnInstall.Add_Click({
                         if ($setup.Extension -eq ".msi") {
                             Start-Process -FilePath "msiexec.exe" -ArgumentList "/i `"$($setup.FullName)`" /qn" -Wait -NoNewWindow
                         } else {
-                            Start-Process -FilePath $setup.FullName -ArgumentList "/S", "/VERYSILENT", "/quiet" -Wait -NoNewWindow
+                            # Kiểm tra nếu là file zip của Tool gen FPT
+                            if ($fileName -match "FPT_Installer") {
+                                Write-Log "Đang cài đặt ẩn FPT_Installer với tham số /Q..."
+                                Start-Process -FilePath $setup.FullName -ArgumentList "/Q" -Wait -NoNewWindow
+                            } else {
+                                Start-Process -FilePath $setup.FullName -ArgumentList "/S", "/VERYSILENT", "/quiet" -Wait -NoNewWindow
+                            }
                         }
                         Write-Log "Hoàn thành cài đặt $($setup.Name)."
                     }
+                    Start-InstalledApp -AppObj $app # Gọi hàm khởi chạy
                 }
             } catch {
                 Write-Log "LỖI khi xử lý $($app.Name): $($_.Exception.Message)"

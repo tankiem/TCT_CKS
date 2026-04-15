@@ -9,7 +9,7 @@ set "DesktopPath=%UserProfile%\Desktop"
 set "ZipFilePath=%DesktopPath%\%FileName%.zip"
 set "ExtractPath=%DesktopPath%"
 
-set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/latest/download/%FileName%.zip"
+set "DownloadUrl=https://github.com/tankiem/TCT_CKS/releases/latest/download/VNPT-CA.Plugin_Office_Setup.1.0.5.0.zip"
 
 :: ==============================
 :: DOWNLOAD
